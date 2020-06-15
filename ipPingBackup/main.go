@@ -89,9 +89,14 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	type iplist struct {
 		Available []net.IP
 		Occupied  []net.IP
+		AvailLen int
 	}
 	ipl := iplist{}
+	ipl.Available = nil
+	ipl.Occupied = nil
+	ipl.AvailLen = 0
 
+	ipl.AvailLen = len(stat.Available)
 	ipl.Available = make([]net.IP, 0, len(stat.Available))
 	for _, ip := range stat.Available {
 		ipl.Available = append(ipl.Available, net.ParseIP(ip))
@@ -108,8 +113,7 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return bytes.Compare(ipl.Occupied[i], ipl.Occupied[j]) < 0
 	})
 
-	fmt.Println(ipl)
-	fp := path.Join("var", "iprangeping", "www", "templates", "index.html")
+	fp := path.Join("templates", "index.html")
 	tmpl, err := template.ParseFiles(fp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
