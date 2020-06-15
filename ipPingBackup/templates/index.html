@@ -17,7 +17,7 @@
 <body>
 <div class="container">
     <h2 class="display-6">Available or not Reachable</h2>
-    <h6>There are {{ AvailLen }} IP Available in the Given Range</h6>
+    <h6>There are {{ .AvailLen }} IPs Available in the Given Range</h6>
     {{with .Available }}
     {{ range . }}
         <li class="list-group-item list-group-item-success">{{ . }}</li>

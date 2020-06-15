@@ -26,7 +26,7 @@ var stat = PingStat{}
 
 func reachcheck(s string, wg *sync.WaitGroup) {
 
-	// reset PingStat Struct to nil;
+	// reset PingStat Struct to nil
 	stat.Available = nil
 	stat.Occupied = nil
 
@@ -78,38 +78,34 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	type iplist struct {
 		Available []net.IP
 		Occupied  []net.IP
-		AvailLen	int
+		AvailLen  int
 	}
 	ipl := iplist{}
-
-	ipl.AvailLen = len(ipl.Available)
 	ipl.Available = make([]net.IP, 0, len(stat.Available))
 	for _, ip := range stat.Available {
 		ipl.Available = append(ipl.Available, net.ParseIP(ip))
 	}
-	sort.Slice(ipl.Available, func(i, j int) bool{
-		return bytes.Compare(ipl.Available[i], ipl.Available[j]) <0
+	sort.Slice(ipl.Available, func(i, j int) bool {
+		return bytes.Compare(ipl.Available[i], ipl.Available[j]) < 0
 	})
 
 	ipl.Occupied = make([]net.IP, 0, len(stat.Occupied))
 	for _, ip := range stat.Occupied {
 		ipl.Occupied = append(ipl.Occupied, net.ParseIP(ip))
 	}
-	sort.Slice(ipl.Occupied, func(i, j int) bool{
-		return bytes.Compare(ipl.Occupied[i], ipl.Occupied[j]) <0
+	sort.Slice(ipl.Occupied, func(i, j int) bool {
+		return bytes.Compare(ipl.Occupied[i], ipl.Occupied[j]) < 0
 	})
 
-	fmt.Println(ipl)
+	ipl.AvailLen = len(ipl.Available)
 	fp := path.Join("templates", "index.html")
 	tmpl, err := template.ParseFiles(fp)
 	if err != nil {
-		fmt.Println(err)
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if err := tmpl.Execute(w, ipl); err != nil {
-		fmt.Println(err)
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
