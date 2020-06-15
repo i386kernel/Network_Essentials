@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sparrc/go-ping"
@@ -26,7 +27,7 @@ var stat = PingStat{}
 
 func reachcheck(s string, wg *sync.WaitGroup) {
 
-	// reset PingStat Struct to nil
+	// reset PingStat Struct to nil;
 	stat.Available = nil
 	stat.Occupied = nil
 
@@ -59,6 +60,11 @@ func pingIP(start, end string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	if (startIPLastOctet >= 255) || (endIPLastOctet >= 255) {
+		fmt.Println("Wrong IP Range")
+		return
+	}
+
 	var hostslice []string
 	for i := startIPLastOctet; i <= endIPLastOctet; i++ {
 		hostslice = append(hostslice, startIPSplit[0]+"."+startIPSplit[1]+"."+startIPSplit[2]+"."+strconv.Itoa(i))
@@ -75,12 +81,17 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	endIP := ps.ByName("end")
 	pingIP(startIP, endIP)
 
+	if len(stat.Occupied) <= 1 || len(stat.Available) <=1{
+		fmt.Fprintf(w, "Check Your IP Range," +
+			" It works only on last octet, Your Range is StartIP : %s", startIP)
+	}
+
 	type iplist struct {
 		Available []net.IP
 		Occupied  []net.IP
-		AvailLen  int
 	}
 	ipl := iplist{}
+
 	ipl.Available = make([]net.IP, 0, len(stat.Available))
 	for _, ip := range stat.Available {
 		ipl.Available = append(ipl.Available, net.ParseIP(ip))
@@ -97,7 +108,7 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return bytes.Compare(ipl.Occupied[i], ipl.Occupied[j]) < 0
 	})
 
-	ipl.AvailLen = len(ipl.Available)
+	fmt.Println(ipl)
 	fp := path.Join("templates", "index.html")
 	tmpl, err := template.ParseFiles(fp)
 	if err != nil {
@@ -105,13 +116,37 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 	if err := tmpl.Execute(w, ipl); err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
+func ipInput(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Println(err)
+	}
+	t, err := template.ParseFiles("templates/submit.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+	t.Execute(w, nil)
+	fmt.Println("Start IP", r.Form["startIP"])
+	fmt.Println("End IP", r.Form["endIP"])
+	startIP := r.Form["startIP"]
+	endIP := r.Form["endIP"]
+	localhostres := fmt.Sprintf("/:%s/:%s", startIP, endIP)
+	fmt.Println(localhostres)
+}
+
+var portflag *string
 func main() {
+	portflag = flag.String("port", "5000", "Enter the PortNumber for this service to run")
+	flag.Parse()
+	fmt.Printf("IP Ping Range Running in: %s", *portflag)
 	router := httprouter.New()
 	router.GET("/:start/:end", checkIP)
-	log.Fatal(http.ListenAndServe(":5000", router))
+	router.GET("/", ipInput)
+	log.Fatal(http.ListenAndServe(":5555", router))
 }
