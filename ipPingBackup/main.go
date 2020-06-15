@@ -109,7 +109,7 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	})
 
 	fmt.Println(ipl)
-	fp := path.Join("templates", "index.html")
+	fp := path.Join("var", "iprangeping", "www", "templates", "index.html")
 	tmpl, err := template.ParseFiles(fp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
