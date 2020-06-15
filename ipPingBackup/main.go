@@ -148,5 +148,5 @@ func main() {
 	router := httprouter.New()
 	router.GET("/:start/:end", checkIP)
 	router.GET("/", ipInput)
-	log.Fatal(http.ListenAndServe(":5555", router))
+	log.Fatal(http.ListenAndServe(":5000", router))
 }
