@@ -78,9 +78,11 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	type iplist struct {
 		Available []net.IP
 		Occupied  []net.IP
+		AvailLen	int
 	}
 	ipl := iplist{}
 
+	ipl.AvailLen = len(ipl.Available)
 	ipl.Available = make([]net.IP, 0, len(stat.Available))
 	for _, ip := range stat.Available {
 		ipl.Available = append(ipl.Available, net.ParseIP(ip))

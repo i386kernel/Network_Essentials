@@ -6,24 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
     <title>Range Ping App</title>
     <div class="jumbotron">
         <h1 class="display-4">IP Range Ping</h1>
         <p class="lead">This Program Pings(ICMP) all the given IP's in the range concurrently
             with a timeout of 5 seconds (~ approx 5 Packets) and checks if the IP is reachable</p>
-        <hr class="my-4">
+        <h6 class="text-right">-Resiliency Orchestration RedHat Openshift</h6>
     </div>
 </head>
 <body>
 <div class="container">
     <h2 class="display-6">Available or not Reachable</h2>
-{{with .Available }}
+    <h6>There are {{ AvailLen }} IP Available in the Given Range</h6>
+    {{with .Available }}
     {{ range . }}
         <li class="list-group-item list-group-item-success">{{ . }}</li>
     {{ end}}
 {{end}}
-
     <h2 class="display-6">Utilized or Reachable</h2>
 {{with .Occupied }}
     {{  range . }}
