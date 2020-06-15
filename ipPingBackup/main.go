@@ -81,7 +81,7 @@ func checkIP(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	endIP := ps.ByName("end")
 	pingIP(startIP, endIP)
 
-	if len(stat.Occupied) <= 1 || len(stat.Available) <=1{
+	if len(stat.Occupied) < 1 || len(stat.Available) <=1{
 		fmt.Fprintf(w, "Check Your IP Range," +
 			" It works only on last octet, Your Range is StartIP : %s", startIP)
 	}
